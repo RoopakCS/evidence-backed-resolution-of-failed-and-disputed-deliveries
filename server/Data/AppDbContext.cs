@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using server;
+using server.Models;
 
 namespace server.Data;
 
@@ -10,6 +10,5 @@ public class AppDbContext : DbContext
     {
     }
 
-    // public DbSet<Student> students {get;set;}
-    // public DbSet<User> users {get;set;}
+    public DbSet<Customer> Customers { get; set; }
 }

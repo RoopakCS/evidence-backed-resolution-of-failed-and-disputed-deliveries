@@ -4,9 +4,6 @@ namespace server.DTO;
 
 public class RegisterDto
 {
-    [Required(ErrorMessage = "Username is Required")]
-    [MaxLength(100)]
-    public string username { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "First Name is Required")]
     [MaxLength(50)]
