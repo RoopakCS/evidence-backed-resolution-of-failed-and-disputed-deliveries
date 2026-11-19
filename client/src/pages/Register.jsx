@@ -127,9 +127,9 @@ function Register() {
                     confirmpassword: "",
                 });
 
-                // Navigate to login page
+                // Navigate to home page
                 setTimeout(() => {
-                    navigate("/login");
+                    navigate("/home");
                 }, 1200);
 
             } else {

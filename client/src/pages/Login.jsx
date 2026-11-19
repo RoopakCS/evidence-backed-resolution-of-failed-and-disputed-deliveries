@@ -60,10 +60,8 @@ export default function Login({ onLoginSuccess }) {
 
         if (onLoginSuccess) {
           onLoginSuccess(result)
-        } else {
-          // If no parent callback, retain session state on page or route
-          navigate('/login')
         }
+        navigate('/home')
       } else {
         setErrorMessage(
           result.message || 'Authentication failed. Please check your credentials.'
