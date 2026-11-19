@@ -3,7 +3,7 @@
 @password = Password@123
 
 ### Successful registration
-POST {{server_HostAddress}}/register
+POST {{server_HostAddress}}/auth/register
 Content-Type: application/json
 
 {
@@ -16,7 +16,7 @@ Content-Type: application/json
 }
 
 ### Duplicate registration
-POST {{server_HostAddress}}/register
+POST {{server_HostAddress}}/auth/register
 Content-Type: application/json
 
 {
@@ -30,7 +30,7 @@ Content-Type: application/json
 
 ### Successful login
 # @name login
-POST {{server_HostAddress}}/login
+POST {{server_HostAddress}}/auth/login
 Content-Type: application/json
 
 {
@@ -43,7 +43,7 @@ client.global.set("authToken", response.body.token);
 %}
 
 ### Incorrect password
-POST {{server_HostAddress}}/login
+POST {{server_HostAddress}}/auth/login
 Content-Type: application/json
 
 {
@@ -52,7 +52,7 @@ Content-Type: application/json
 }
 
 ### Login with nonexistent email
-POST {{server_HostAddress}}/login
+POST {{server_HostAddress}}/auth/login
 Content-Type: application/json
 
 {
@@ -61,13 +61,13 @@ Content-Type: application/json
 }
 
 ### Access /me using a valid JWT
-GET {{server_HostAddress}}/me
+GET {{server_HostAddress}}/auth/me
 Authorization: Bearer {{authToken}}
 
 ### Access /me without a JWT
-GET {{server_HostAddress}}/me
+GET {{server_HostAddress}}/auth/me
 
 ### Access /me using an invalid JWT
-GET {{server_HostAddress}}/me
+GET {{server_HostAddress}}/auth/me
 Authorization: Bearer invalid.jwt.token
 Accept: application/json
