@@ -8,4 +8,6 @@ public class AuthResponseDto
     public string firstname { get; set; } = string.Empty;
     public string lastname { get; set; } = string.Empty;
     public string email { get; set; } = string.Empty;
+    public string? token { get; set; }
+    public DateTime? token_expires_at { get; set; }
 }
