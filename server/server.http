@@ -1,6 +1,73 @@
 @server_HostAddress = http://localhost:5077
+@email = basil@gmail.com
+@password = Password@123
 
-GET {{server_HostAddress}}/weatherforecast/
+### Successful registration
+POST {{server_HostAddress}}/register
+Content-Type: application/json
+
+{
+  "firstname": "Abdur Rahman Basil",
+  "lastname": "A H",
+  "email": "{{email}}",
+  "phonenumber": "1234567890",
+  "password": "{{password}}",
+  "confirmpassword": "{{password}}"
+}
+
+### Duplicate registration
+POST {{server_HostAddress}}/register
+Content-Type: application/json
+
+{
+  "firstname": "JWT",
+  "lastname": "Test",
+  "email": "{{email}}",
+  "phonenumber": "1234567890",
+  "password": "{{password}}",
+  "confirmpassword": "{{password}}"
+}
+
+### Successful login
+# @name login
+POST {{server_HostAddress}}/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+> {%
+client.global.set("authToken", response.body.token);
+%}
+
+### Incorrect password
+POST {{server_HostAddress}}/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "WrongPassword@123"
+}
+
+### Login with nonexistent email
+POST {{server_HostAddress}}/login
+Content-Type: application/json
+
+{
+  "email": "does-not-exist@example.com",
+  "password": "{{password}}"
+}
+
+### Access /me using a valid JWT
+GET {{server_HostAddress}}/me
+Authorization: Bearer {{authToken}}
+
+### Access /me without a JWT
+GET {{server_HostAddress}}/me
+
+### Access /me using an invalid JWT
+GET {{server_HostAddress}}/me
+Authorization: Bearer invalid.jwt.token
 Accept: application/json
-
-###
