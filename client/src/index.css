@@ -1,516 +1,99 @@
-
-@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
-
-/* ================================
-   DOCKET DESIGN TOKENS
-================================ */
+/* Docket Institutional Modernism Design System */
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300..900;1,300..900&family=Manrope:wght@500;600;700;800&display=swap');
 
 :root {
-    --surface: #fbf8ff;
-    --surface-white: #ffffff;
-    --surface-container-low: #f4f2ff;
-    --surface-container: #ececff;
-    --ink: #101114;
-    --on-surface: #171a2e;
-    --neutral: #686b82;
-    --silver-blue: #9497a9;
-    --primary: #5741d8;
-    --primary-dark: #3e20c0;
-    --secondary: #7132f5;
-    --tertiary: #5b1ecf;
-    --border: #dedee5;
-    --outline: #787586;
-    --success: #149e61;
-    --success-dark: #026b3f;
-    --success-bg: rgba(20, 158, 97, 0.16);
-    --error: #ba1a1a;
-    --error-bg: #ffdad6;
-    --radius-control: 12px;
-    --radius-card: 16px;
-    --shadow-card: 0px 4px 24px rgba(0, 0, 0, 0.03);
-    --shadow-focus: 0 0 0 3px rgba(87, 65, 216, 0.15);
+  /* Brand Chromatics */
+  --docket-primary: #5741d8;
+  --docket-secondary: #7132f5;
+  --docket-tertiary: #5b1ecf;
+  --docket-neutral: #686b82;
+
+  /* Surfaces & Inks */
+  --docket-surface: #fbf8ff;
+  --docket-surface-dim: #d6d8f3;
+  --docket-surface-container-lowest: #ffffff;
+  --docket-surface-container-low: #f4f2ff;
+  --docket-surface-container: #ececff;
+  --docket-surface-container-high: #e5e6ff;
+  --docket-surface-container-highest: #dfe1fc;
+  --docket-on-surface: #171a2e;
+  --docket-on-surface-variant: #474555;
+  --docket-ink: #101114;
+  --docket-silver-blue: #9497a9;
+  --docket-border: #dedee5;
+  --docket-surface-white: #ffffff;
+
+  /* Tints & Statuses */
+  --docket-purple-subtle: rgba(133, 91, 251, 0.16);
+  --docket-purple-hover: rgba(133, 91, 251, 0.08);
+  --docket-purple-glow: rgba(87, 65, 216, 0.15);
+  --docket-success: #149e61;
+  --docket-success-dark: #026b3f;
+  --docket-success-subtle: rgba(20, 158, 97, 0.16);
+  --docket-error: #ba1a1a;
+  --docket-error-container: #ffdad6;
+  --docket-error-text: #93000a;
+  --docket-error-glow: rgba(186, 26, 26, 0.15);
+
+  /* Typography */
+  --font-display: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-ui: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Strict Radiuses */
+  --radius-control: 12px;
+  --radius-card: 16px;
+  --radius-badge: 6px;
+  --radius-badge-lg: 8px;
+  --radius-checkbox: 6px;
+
+  /* Whisper Elevations */
+  --shadow-level-1: 0px 4px 24px rgba(0, 0, 0, 0.03);
+  --shadow-level-2: 0px 1px 4px rgba(16, 24, 40, 0.04);
+  --shadow-level-3: 0px 12px 32px rgba(16, 24, 40, 0.08), 0px 2px 6px rgba(16, 24, 40, 0.04);
+  --shadow-input-focus: 0 0 0 3px var(--docket-purple-glow);
+  --shadow-input-error: 0 0 0 3px var(--docket-error-glow);
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;  /* 4px */
+  --spacing-sm: 0.5rem;   /* 8px */
+  --spacing-md: 1rem;     /* 16px */
+  --spacing-lg: 1.5rem;   /* 24px */
+  --spacing-xl: 2.5rem;   /* 40px */
 }
 
-/* ================================
-   GLOBAL STYLES
-================================ */
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-html {
-    scroll-behavior: smooth;
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  font-family: var(--font-ui);
+  background-color: #ffffff;
+  color: var(--docket-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-body {
-    min-width: 320px;
-    min-height: 100vh;
-    background: var(--surface);
-    color: var(--ink);
-    font-family: 'Hanken Grotesk', sans-serif;
-    font-size: 16px;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-button,
-input {
-    font: inherit;
+a {
+  color: var(--docket-secondary);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+a:hover {
+  color: var(--docket-primary);
+  text-decoration: underline;
 }
 
 button {
-    cursor: pointer;
-}
-
-/* ================================
-   REGISTER PAGE
-================================ */
-
-.register-page {
-    min-height: 100vh;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 48px 24px;
-    background: var(--surface);
-}
-
-/* ================================
-   REGISTER CARD
-================================ */
-
-.register-card {
-    width: 100%;
-    max-width: 560px;
-    padding: 36px 40px;
-    background: var(--surface-white);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-card);
-    box-shadow: var(--shadow-card);
-}
-
-/* ================================
-   BRAND
-================================ */
-
-.brand {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 11px;
-    margin-bottom: 30px;
-}
-
-.brand-icon {
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--primary);
-    background: var(--surface-container-low);
-    border: 1px solid #e4dfff;
-    border-radius: 12px;
-}
-
-.brand span {
-    color: var(--primary);
-    font-family: 'Manrope', sans-serif;
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: 1.2px;
-}
-
-/* ================================
-   REGISTER HEADING
-================================ */
-
-.register-heading {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-    .register-heading h1 {
-        color: var(--on-surface);
-        font-family: 'Manrope', sans-serif;
-        font-size: 28px;
-        font-weight: 700;
-        line-height: 36px;
-        letter-spacing: -0.5px;
-        margin-bottom: 9px;
-    }
-
-    .register-heading p {
-        max-width: 390px;
-        margin: 0 auto;
-        color: var(--neutral);
-        font-size: 15px;
-        font-weight: 400;
-        line-height: 24px;
-    }
-
-/* ================================
-   FORM
-================================ */
-
-.register-form {
-    display: flex;
-    flex-direction: column;
-    gap: 22px;
-}
-
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 16px;
-    row-gap: 20px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    min-width: 0;
-}
-
-.full-width {
-    grid-column: 1 / -1;
-}
-
-/* ================================
-   LABELS
-================================ */
-
-.form-group label {
-    color: var(--on-surface);
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 20px;
-}
-
-/* ================================
-   INPUT FIELDS
-================================ */
-
-.input-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-}
-
-    .input-wrapper input {
-        width: 100%;
-        height: 50px;
-        padding: 12px 44px;
-        border: 1px solid var(--border);
-        border-radius: var(--radius-control);
-        outline: none;
-        background: var(--surface-white);
-        color: var(--ink);
-        font-family: 'Hanken Grotesk', sans-serif;
-        font-size: 15px;
-        font-weight: 400;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-    }
-
-        .input-wrapper input::placeholder {
-            color: var(--silver-blue);
-            opacity: 1;
-        }
-
-        .input-wrapper input:hover {
-            border-color: var(--outline);
-        }
-
-        .input-wrapper input:focus {
-            border-color: var(--primary);
-            box-shadow: var(--shadow-focus);
-        }
-
-        .input-wrapper input:disabled {
-            background: var(--surface-container-low);
-            cursor: not-allowed;
-        }
-
-/* ================================
-   INPUT ICONS
-================================ */
-
-.input-icon {
-    position: absolute;
-    left: 15px;
-    color: var(--silver-blue);
-    pointer-events: none;
-    transition: color 0.2s ease;
-}
-
-.input-wrapper:focus-within .input-icon {
-    color: var(--primary);
-}
-
-/* ================================
-   PASSWORD VISIBILITY
-================================ */
-
-.password-toggle {
-    position: absolute;
-    right: 13px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    border: none;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--neutral);
-    transition: color 0.2s ease, background 0.2s ease;
-}
-
-    .password-toggle:hover {
-        color: var(--primary);
-        background: var(--surface-container-low);
-    }
-
-    .password-toggle:focus-visible {
-        outline: 2px solid var(--primary);
-        outline-offset: 2px;
-    }
-
-/* ================================
-   PASSWORD HINT
-================================ */
-
-.input-hint {
-    color: var(--neutral);
-    font-size: 12px;
-    font-weight: 400;
-    line-height: 18px;
-}
-
-/* ================================
-   SUBMIT BUTTON
-================================ */
-
-.register-button {
-    width: 100%;
-    min-height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 9px;
-    padding: 13px 16px;
-    border: 1px solid transparent;
-    border-radius: var(--radius-control);
-    background: var(--secondary);
-    color: #ffffff;
-    font-family: 'Hanken Grotesk', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 22px;
-    transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
-}
-
-    .register-button:hover:not(:disabled) {
-        background: var(--primary);
-        box-shadow: 0 2px 8px rgba(87, 65, 216, 0.16);
-    }
-
-    .register-button:active:not(:disabled) {
-        background: var(--tertiary);
-        transform: translateY(1px);
-    }
-
-    .register-button:focus-visible {
-        outline: 3px solid rgba(87, 65, 216, 0.25);
-        outline-offset: 3px;
-    }
-
-    .register-button:disabled {
-        opacity: 0.65;
-        cursor: not-allowed;
-    }
-
-/* ================================
-   LOADING SPINNER
-================================ */
-
-.spinner {
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-/* ================================
-   ERROR AND SUCCESS MESSAGES
-================================ */
-
-.message {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 12px 14px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 500;
-    line-height: 19px;
-}
-
-    .message svg {
-        flex-shrink: 0;
-        margin-top: 1px;
-    }
-
-.error-message {
-    color: var(--error);
-    background: var(--error-bg);
-    border: 1px solid rgba(186, 26, 26, 0.12);
-}
-
-.success-message {
-    color: var(--success-dark);
-    background: var(--success-bg);
-    border: 1px solid rgba(20, 158, 97, 0.12);
-}
-
-/* ================================
-   LOGIN LINK
-================================ */
-
-.login-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 5px;
-    margin-top: 24px;
-    color: var(--neutral);
-    font-size: 14px;
-    line-height: 20px;
-}
-
-    .login-link a {
-        color: var(--primary);
-        font-weight: 700;
-        text-decoration: none;
-        transition: color 0.2s ease;
-    }
-
-        .login-link a:hover {
-            color: var(--secondary);
-            text-decoration: underline;
-        }
-
-/* ================================
-   SECURITY NOTE
-================================ */
-
-.security-note {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 25px;
-    padding-top: 19px;
-    border-top: 1px solid var(--border);
-    color: var(--neutral);
-    font-size: 13px;
-    line-height: 20px;
-}
-
-    .security-note svg {
-        flex-shrink: 0;
-        color: var(--success);
-    }
-
-/* ================================
-   TABLET RESPONSIVE
-================================ */
-
-@media (max-width: 768px) {
-    .register-page {
-        padding: 32px 20px;
-    }
-
-    .register-card {
-        max-width: 520px;
-        padding: 32px;
-    }
-}
-
-/* ================================
-   MOBILE RESPONSIVE
-================================ */
-
-@media (max-width: 600px) {
-    .register-page {
-        align-items: flex-start;
-        padding: 24px 14px;
-    }
-
-    .register-card {
-        padding: 26px 20px;
-    }
-
-    .brand {
-        margin-bottom: 25px;
-    }
-
-    .register-heading {
-        margin-bottom: 25px;
-    }
-
-        .register-heading h1 {
-            font-size: 26px;
-            line-height: 34px;
-        }
-
-    .form-grid {
-        grid-template-columns: 1fr;
-        row-gap: 18px;
-    }
-
-    .full-width {
-        grid-column: auto;
-    }
-
-    .register-form {
-        gap: 20px;
-    }
-}
-
-/* ================================
-   SMALL MOBILE
-================================ */
-
-@media (max-width: 360px) {
-    .register-page {
-        padding: 16px 10px;
-    }
-
-    .register-card {
-        padding: 23px 16px;
-    }
-
-    .register-heading h1 {
-        font-size: 23px;
-    }
-
-    .input-wrapper input {
-        font-size: 14px;
-        padding-left: 40px;
-    }
+  font-family: inherit;
 }
