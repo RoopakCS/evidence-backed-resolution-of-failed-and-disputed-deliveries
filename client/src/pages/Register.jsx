@@ -1,9 +1,12 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import "./Register.css";
+import {
+    registerUser
+} from '../services/authService'
 
 import {
-    ShieldCheck,
     UserRound,
     Mail,
     Phone,
@@ -96,6 +99,7 @@ function Register() {
         setError("");
         setSuccess("");
 
+        // Validate form
         const validationError = validateForm();
 
         if (validationError) {
@@ -106,16 +110,14 @@ function Register() {
         setLoading(true);
 
         try {
-            const response = await axios.post(
-                `${import.meta.env.VITE_API_BASE_URL}/Auth/register`,
-                formData
-            );
+            const result = await registerUser(formData);
 
-            if (response.data.success) {
+            if (result.success) {
                 setSuccess(
-                    response.data.message || "Registration successful!"
+                    result.message || "Registration successful!"
                 );
 
+                // Clear form
                 setFormData({
                     firstname: "",
                     lastname: "",
@@ -125,67 +127,66 @@ function Register() {
                     confirmpassword: "",
                 });
 
+                // Navigate to login page
                 setTimeout(() => {
                     navigate("/login");
                 }, 1200);
+
             } else {
                 setError(
-                    response.data.message || "Registration failed."
+                    result.message || "Registration failed."
                 );
             }
+
         } catch (err) {
-            const data = err.response?.data;
-
-            const validationMessages = data?.errors
-                ? Object.values(data.errors).flat().join(" ")
-                : "";
-
-            const serverMessage =
-                data?.message ||
-                data?.Message ||
-                validationMessages ||
-                (typeof data === "string" ? data : "");
+            console.error("Registration error:", err);
 
             setError(
-                serverMessage || "Something went wrong. Please try again."
+                "Something went wrong. Please try again."
             );
+
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <main className="register-page">
-            <section className="register-card">
+        <main className="register-page-container">
+            <section className="register-card-wrapper">
 
-                <div className="brand">
-                    <div className="brand-icon">
-                        <ShieldCheck size={25} />
-                    </div>
-                    <span>DOCKET</span>
+                {/* Header */}
+                <div className="register-header-group">
+                    <h1 className="register-headline">
+                        Create your account
+                    </h1>
+
+                    <p className="register-subheadline">
+                        Get started by creating your Docket account.
+                    </p>
                 </div>
 
-                <div className="register-heading">
-                    <h1>Create your account</h1>
-                   
-                </div>
+                {/* Form */}
+                <form
+                    onSubmit={handleSubmit}
+                    className="register-form"
+                >
 
-                <form onSubmit={handleSubmit} className="register-form">
+                    <div className="register-form-grid">
 
-                    <div className="form-grid">
+                        {/* First Name */}
+                        <div className="register-field-group">
+                            <label htmlFor="firstname">
+                                First Name
+                            </label>
 
-                        
-                        <div className="form-group">
-                            <label htmlFor="firstname">First Name</label>
-
-                            <div className="input-wrapper">
-                                <UserRound className="input-icon" size={18} />
+                            <div className="register-input-container">
+                                <UserRound size={18} className="register-input-icon" />
 
                                 <input
                                     id="firstname"
                                     type="text"
                                     name="firstname"
-                                    placeholder="Enter first name"
+                                    placeholder="First name"
                                     value={formData.firstname}
                                     onChange={handleChange}
                                     maxLength={50}
@@ -194,17 +195,20 @@ function Register() {
                             </div>
                         </div>
 
-                        <div className="form-group">
-                            <label htmlFor="lastname">Last Name</label>
+                        {/* Last Name */}
+                        <div className="register-field-group">
+                            <label htmlFor="lastname">
+                                Last Name
+                            </label>
 
-                            <div className="input-wrapper">
-                                <UserRound className="input-icon" size={18} />
+                            <div className="register-input-container">
+                                <UserRound size={18} className="register-input-icon" />
 
                                 <input
                                     id="lastname"
                                     type="text"
                                     name="lastname"
-                                    placeholder="Enter last name"
+                                    placeholder="Last name"
                                     value={formData.lastname}
                                     onChange={handleChange}
                                     maxLength={50}
@@ -213,11 +217,14 @@ function Register() {
                             </div>
                         </div>
 
-                        <div className="form-group full-width">
-                            <label htmlFor="email">Email Address</label>
+                        {/* Email */}
+                        <div className="register-field-group full-width">
+                            <label htmlFor="email">
+                                Email Address
+                            </label>
 
-                            <div className="input-wrapper">
-                                <Mail className="input-icon" size={18} />
+                            <div className="register-input-container">
+                                <Mail size={18} className="register-input-icon" />
 
                                 <input
                                     id="email"
@@ -232,11 +239,14 @@ function Register() {
                             </div>
                         </div>
 
-                        <div className="form-group full-width">
-                            <label htmlFor="phonenumber">Phone Number</label>
+                        {/* Phone */}
+                        <div className="register-field-group full-width">
+                            <label htmlFor="phonenumber">
+                                Phone Number
+                            </label>
 
-                            <div className="input-wrapper">
-                                <Phone className="input-icon" size={18} />
+                            <div className="register-input-container">
+                                <Phone size={18} className="register-input-icon" />
 
                                 <input
                                     id="phonenumber"
@@ -251,11 +261,14 @@ function Register() {
                             </div>
                         </div>
 
-                        <div className="form-group full-width">
-                            <label htmlFor="password">Password</label>
+                        {/* Password */}
+                        <div className="register-field-group full-width">
+                            <label htmlFor="password">
+                                Password
+                            </label>
 
-                            <div className="input-wrapper">
-                                <LockKeyhole className="input-icon" size={18} />
+                            <div className="register-input-container">
+                                <LockKeyhole size={18} className="register-input-icon" />
 
                                 <input
                                     id="password"
@@ -269,7 +282,7 @@ function Register() {
 
                                 <button
                                     type="button"
-                                    className="password-toggle"
+                                    className="register-password-toggle"
                                     onClick={() => setShowPassword(!showPassword)}
                                     aria-label="Toggle password visibility"
                                 >
@@ -281,19 +294,20 @@ function Register() {
                                 </button>
                             </div>
 
-                            <span className="input-hint">
-                                Minimum 8 characters with uppercase, lowercase,
-                                number and special character.
+                            <span className="register-input-hint">
+                                Minimum 8 characters with uppercase,
+                                lowercase, number and special character.
                             </span>
                         </div>
 
-                        <div className="form-group full-width">
+                        {/* Confirm Password */}
+                        <div className="register-field-group full-width">
                             <label htmlFor="confirmpassword">
                                 Confirm Password
                             </label>
 
-                            <div className="input-wrapper">
-                                <LockKeyhole className="input-icon" size={18} />
+                            <div className="register-input-container">
+                                <LockKeyhole size={18} className="register-input-icon" />
 
                                 <input
                                     id="confirmpassword"
@@ -307,7 +321,7 @@ function Register() {
 
                                 <button
                                     type="button"
-                                    className="password-toggle"
+                                    className="register-password-toggle"
                                     onClick={() =>
                                         setShowConfirmPassword(!showConfirmPassword)
                                     }
@@ -324,28 +338,31 @@ function Register() {
 
                     </div>
 
+                    {/* Error Message */}
                     {error && (
-                        <div className="message error-message">
+                        <div className="register-feedback error">
                             <AlertCircle size={18} />
                             <span>{error}</span>
                         </div>
                     )}
 
+                    {/* Success Message */}
                     {success && (
-                        <div className="message success-message">
+                        <div className="register-feedback success">
                             <CheckCircle size={18} />
                             <span>{success}</span>
                         </div>
                     )}
 
+                    {/* Submit Button */}
                     <button
                         type="submit"
-                        className="register-button"
+                        className="register-submit-button"
                         disabled={loading}
                     >
                         {loading ? (
                             <>
-                                <LoaderCircle className="spinner" size={19} />
+                                <LoaderCircle className="register-spinner" size={18} />
                                 Creating Account...
                             </>
                         ) : (
@@ -355,12 +372,15 @@ function Register() {
 
                 </form>
 
-                <div className="login-link">
-                    Already have an account?
-                    <Link to="/login">Sign in</Link>
+                {/* Footer */}
+                <div className="register-footer-section">
+                    <p>
+                        Already have an account?
+                        <Link to="/login" className="register-login-link">
+                            Sign in
+                        </Link>
+                    </p>
                 </div>
-
-                
 
             </section>
         </main>

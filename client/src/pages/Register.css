@@ -1,0 +1,310 @@
+
+/* Docket Registration Page */
+
+.register-page-container {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff;
+    padding: 2.5rem 1.5rem;
+    box-sizing: border-box;
+}
+
+/* Main Card */
+
+.register-card-wrapper {
+    width: 100%;
+    max-width: 460px;
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+}
+
+/* Header */
+
+.register-header-group {
+    margin-bottom: 1.75rem;
+    text-align: left;
+}
+
+.register-headline {
+    font-family: var(--font-display, 'Manrope', sans-serif);
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 40px;
+    letter-spacing: -0.5px;
+    color: var(--docket-ink, #101114);
+    margin: 0 0 0.5rem;
+}
+
+.register-subheadline {
+    font-family: var(--font-ui, 'Hanken Grotesk', sans-serif);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 22px;
+    color: var(--docket-neutral, #686b82);
+    margin: 0;
+}
+
+/* Form */
+
+.register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+    width: 100%;
+}
+
+.register-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.15rem 1rem;
+}
+
+/* Field Groups */
+
+.register-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: left;
+    min-width: 0;
+}
+
+    .register-field-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .register-field-group label {
+        font-family: var(--font-ui, 'Hanken Grotesk', sans-serif);
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 20px;
+        color: var(--docket-ink, #101114);
+    }
+
+/* Input Containers */
+
+.register-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.register-input-icon {
+    position: absolute;
+    left: 14px;
+    color: var(--docket-silver-blue, #9497a9);
+    pointer-events: none;
+    flex-shrink: 0;
+}
+
+.register-input-container input {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    background-color: #ffffff;
+    border: 1px solid var(--docket-border, #dedee5);
+    border-radius: var(--radius-control, 12px);
+    padding: 13px 14px 13px 42px;
+    font-family: var(--font-ui, 'Hanken Grotesk', sans-serif);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 22px;
+    color: var(--docket-ink, #101114);
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+    .register-input-container input::placeholder {
+        color: var(--docket-silver-blue, #9497a9);
+    }
+
+    .register-input-container input:hover:not(:focus):not(:disabled) {
+        border-color: #c4c4d2;
+    }
+
+    .register-input-container input:focus {
+        border-color: #5235e8;
+        box-shadow: 0 0 0 3px rgba(82, 53, 232, 0.15);
+    }
+
+/* Password Toggle */
+
+.register-password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    padding: 6px;
+    cursor: pointer;
+    color: var(--docket-silver-blue, #9497a9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: color 0.15s ease;
+}
+
+    .register-password-toggle:hover {
+        color: var(--docket-ink, #101114);
+    }
+
+.register-input-container input:has(~ .register-password-toggle) {
+    padding-right: 48px;
+}
+
+/* Password Hint */
+
+.register-input-hint {
+    font-family: var(--font-ui, 'Hanken Grotesk', sans-serif);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 18px;
+    color: var(--docket-neutral, #686b82);
+}
+
+/* Feedback Messages */
+
+.register-feedback {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-family: var(--font-ui, 'Hanken Grotesk', sans-serif);
+    font-size: 13px;
+    line-height: 18px;
+    font-weight: 500;
+    text-align: left;
+}
+
+    .register-feedback svg {
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    .register-feedback.error {
+        background-color: #ffdad6;
+        color: #93000a;
+        border: 1px solid rgba(186, 26, 26, 0.2);
+    }
+
+    .register-feedback.success {
+        background-color: rgba(20, 158, 97, 0.16);
+        color: #026b3f;
+        border: 1px solid rgba(20, 158, 97, 0.25);
+    }
+
+/* Submit Button */
+
+.register-submit-button {
+    width: 100%;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: #5235e8;
+    color: #ffffff;
+    padding: 13px 20px;
+    border-radius: var(--radius-control, 12px);
+    font-family: var(--font-ui, 'Hanken Grotesk', sans-serif);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 22px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.05s ease;
+}
+
+    .register-submit-button:hover:not(:disabled) {
+        background-color: #4528d4;
+    }
+
+    .register-submit-button:active:not(:disabled) {
+        background-color: #3b1ec2;
+        transform: translateY(1px);
+    }
+
+    .register-submit-button:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .register-submit-button:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(82, 53, 232, 0.25);
+    }
+
+/* Loading Spinner */
+
+.register-spinner {
+    animation: register-spin 0.8s linear infinite;
+}
+
+@keyframes register-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Footer */
+
+.register-footer-section {
+    margin-top: 1.75rem;
+    text-align: center;
+}
+
+    .register-footer-section p {
+        font-family: var(--font-ui, 'Hanken Grotesk', sans-serif);
+        font-size: 14px;
+        line-height: 20px;
+        color: var(--docket-ink, #101114);
+        margin: 0;
+    }
+
+.register-login-link {
+    font-weight: 600;
+    color: #5235e8;
+    text-decoration: none;
+    margin-left: 0.3rem;
+    transition: color 0.15s ease;
+}
+
+    .register-login-link:hover {
+        color: #3b1ec2;
+        text-decoration: underline;
+    }
+
+/* Responsive Design */
+
+@media (max-width: 480px) {
+    .register-page-container {
+        padding: 2rem 1.25rem;
+        align-items: flex-start;
+    }
+
+    .register-card-wrapper {
+        max-width: 100%;
+    }
+
+    .register-headline {
+        font-size: 28px;
+        line-height: 36px;
+    }
+
+    .register-form-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .register-field-group.full-width {
+        grid-column: auto;
+    }
+}

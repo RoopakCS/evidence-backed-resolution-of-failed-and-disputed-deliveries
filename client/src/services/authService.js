@@ -142,6 +142,52 @@ export function getStoredSession() {
   }
   return null
 }
+/**
+ * Register a new user against POST /auth/register
+ */
+export async function registerUser(formData) {
+    try {
+        const response = await apiRequest('/register', {
+            method: 'POST',
+            body: JSON.stringify({
+                firstname: formData.firstname.trim(),
+                lastname: formData.lastname.trim(),
+                email: formData.email.trim(),
+                phonenumber: formData.phonenumber.trim(),
+                password: formData.password,
+                confirmpassword: formData.confirmpassword,
+            }),
+        });
+
+        const data = await response.json().catch(() => null);
+
+        if (response.ok && data?.success) {
+            return {
+                success: true,
+                message: data.message || 'Registration successful!',
+            };
+        }
+
+        let errorMessage = data?.message;
+
+        if (!errorMessage && data?.errors) {
+            errorMessage = Object.values(data.errors)
+                .flat()
+                .join('. ');
+        }
+
+        return {
+            success: false,
+            message: errorMessage || `Registration failed (Status ${response.status}).`,
+        };
+
+    } catch {
+        return {
+            success: false,
+            message: 'Unable to reach the authentication server. Please ensure the backend is running.',
+        };
+    }
+}
 
 /**
  * Clears authentication tokens and cached user
