@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/Solution Items/" />
+  <Project Path="ChatbotService/ChatbotService.csproj" Id="8d5fc0ac-8358-4b87-abb7-98476cda7f80" />
+  <Project Path="CustomerClient/CustomerClient.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="DeliveryAttemptService/DeliveryAttemptService.csproj" Id="e4054b47-b392-4023-bc68-f029307808d9" />
+  <Project Path="IdentityService/IdentityService.csproj" Id="46c88cdd-409e-485c-8622-b87e07b6bced" />
+  <Project Path="NotificationService/NotificationService.csproj" Id="6c958ddf-6ce0-4f96-a7cd-646e1570d3da" />
+  <Project Path="ShipmentManagementService/ShipmentManagementService.csproj" Id="69ffd7a9-b389-4e8b-99de-ebbdfb8ae56b" />
+  <Project Path="TicketManagementService/TicketManagementService.csproj" Id="23a8ddc9-98f4-45bf-be57-29fa6615148c" />
+</Solution>

@@ -1,0 +1,31 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "IdentityService\\IdentityService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "ShipmentManagementService\\ShipmentManagementService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "DeliveryAttemptService\\DeliveryAttemptService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "TicketManagementService\\TicketManagementService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "NotificationService\\NotificationService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "ChatbotService\\ChatbotService.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
