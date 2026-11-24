@@ -5,6 +5,7 @@
     <Deploy />
   </Project>
   <Project Path="ChatbotService/ChatbotService.csproj" Id="8d5fc0ac-8358-4b87-abb7-98476cda7f80" />
+  <Project Path="Contracts/Contracts.csproj" />
   <Project Path="CustomerClient/customerclient.esproj">
     <Build />
     <Deploy />
