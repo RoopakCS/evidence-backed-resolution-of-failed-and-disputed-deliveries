@@ -11,6 +11,7 @@
     <Deploy />
   </Project>
   <Project Path="DeliveryAttemptService/DeliveryAttemptService.csproj" Id="e4054b47-b392-4023-bc68-f029307808d9" />
+  <Project Path="Docket.Security/Docket.Security.csproj" Id="cdd1f7c8-8336-4987-ace6-faa88fa2138f" />
   <Project Path="DriverClient/driverclient.esproj">
     <Build />
     <Deploy />
