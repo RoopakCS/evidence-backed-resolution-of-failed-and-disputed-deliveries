@@ -1,22 +1,39 @@
 using DotNetEnv;
 using Docket.Security.Extensions;
+using ChatbotService.Configuration;
+using ChatbotService.Data;
+using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 
 Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration["Jwt:SecretKey"] =
-    Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
-
-builder.Configuration["Jwt:Issuer"] =
-    Environment.GetEnvironmentVariable("JWT_ISSUER");
-
-builder.Configuration["Jwt:Audience"] =
-    Environment.GetEnvironmentVariable("JWT_AUDIENCE");
-
 builder.Services.AddControllers();
 
 builder.Services.AddDocketSecurity(builder.Configuration);
+
+var databaseSettings = builder.Configuration
+    .GetSection("Database")
+    .Get<DatabaseSettings>()
+    ?? throw new InvalidOperationException(
+        "Database configuration is missing.");
+
+var connectionStringBuilder = new MySqlConnectionStringBuilder
+{
+    Server = databaseSettings.Host,
+    Port = (uint)databaseSettings.Port,
+    Database = databaseSettings.Name,
+    UserID = databaseSettings.Username,
+    Password = databaseSettings.Password
+};
+
+var connectionString = connectionStringBuilder.ConnectionString;
+
+builder.Services.AddDbContext<ChatbotDbContext>(options =>
+    options.UseMySql(
+        connectionString,
+        new MySqlServerVersion(new Version(8, 4, 0))));
 
 var app = builder.Build();
 

@@ -1,0 +1,90 @@
+name: docket
+
+services:
+
+  # Chatbot Service Database
+  chatbot-db:
+    image: mysql:8.4
+    container_name: docket-chatbot-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: docket_chatbot
+    ports:
+      - "3307:3306"
+    volumes:
+      - chatbot-db-data:/var/lib/mysql
+
+  # Identity Service Database
+  identity-db:
+    image: mysql:8.4
+    container_name: docket-identity-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: docket_identity
+    ports:
+      - "3308:3306"
+    volumes:
+      - identity-db-data:/var/lib/mysql
+
+  # Delivery Attempt Service Database
+  delivery-attempt-db:
+    image: mysql:8.4
+    container_name: docket-delivery-attempt-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: docket_delivery_attempt
+    ports:
+      - "3309:3306"
+    volumes:
+      - delivery-attempt-db-data:/var/lib/mysql
+
+  # Shipment Management Service Database
+  shipment-management-db:
+    image: mysql:8.4
+    container_name: docket-shipment-management-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: docket_shipment_management
+    ports:
+      - "3310:3306"
+    volumes:
+      - shipment-management-db-data:/var/lib/mysql
+
+  # Ticket Management Service Database
+  ticket-management-db:
+    image: mysql:8.4
+    container_name: docket-ticket-management-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: docket_ticket_management
+    ports:
+      - "3311:3306"
+    volumes:
+      - ticket-management-db-data:/var/lib/mysql
+
+  # Notification Service Database
+  notification-db:
+    image: mysql:8.4
+    container_name: docket-notification-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: docket_notification
+    ports:
+      - "3312:3306"
+    volumes:
+      - notification-db-data:/var/lib/mysql
+
+
+volumes:
+  chatbot-db-data:
+  identity-db-data:
+  delivery-attempt-db-data:
+  shipment-management-db-data:
+  ticket-management-db-data:
+  notification-db-data:
