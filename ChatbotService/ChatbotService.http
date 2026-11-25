@@ -1,0 +1,45 @@
+@baseUrl = http://localhost:5004
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhOGIyYzRkNi0xMjM0LTQ1NjctODkwMS1hYmNkZWYxMjM0NTYiLCJpc3MiOiJkb2NrZXQtaWRlbnRpdHkiLCJhdWQiOiJkb2NrZXQtc2VydmljZXMiLCJpYXQiOjE3OTU2NDAwMDAsImV4cCI6MTg5MzQ1NjAwMH0.n_GKFgC4VcEAk5rUfjwKYPk9v8MS6Vjhe-5UpESnGlo
+
+### 1. Get Chat History
+GET {{baseUrl}}/api/chat/history
+Authorization: Bearer {{token}}
+
+###
+
+### 2. Send First Message
+POST {{baseUrl}}/api/chat/messages
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "message": "Hello! Can you help me track my delivery?"
+}
+
+###
+
+### 3. Send Another Message
+POST {{baseUrl}}/api/chat/messages
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "message": "My shipment has been delayed. What should I do?"
+}
+
+###
+
+### 4. Get Chat History Again
+GET {{baseUrl}}/api/chat/history
+Authorization: Bearer {{token}}
+
+###
+
+### 5. Test Without JWT
+GET {{baseUrl}}/api/chat/history
+
+###
+
+### 6. Test With Invalid JWT
+GET {{baseUrl}}/api/chat/history
+Authorization: Bearer invalid_token

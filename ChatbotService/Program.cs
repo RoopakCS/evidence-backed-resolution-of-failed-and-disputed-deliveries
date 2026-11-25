@@ -1,7 +1,11 @@
-using DotNetEnv;
-using Docket.Security.Extensions;
 using ChatbotService.Configuration;
 using ChatbotService.Data;
+using ChatbotService.Repositories.Implementations;
+using ChatbotService.Repositories.Interfaces;
+using ChatbotService.Services.Implementations;
+using ChatbotService.Services.Interfaces;
+using Docket.Security.Extensions;
+using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
 
@@ -34,6 +38,12 @@ builder.Services.AddDbContext<ChatbotDbContext>(options =>
     options.UseMySql(
         connectionString,
         new MySqlServerVersion(new Version(8, 4, 0))));
+
+builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
+
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+
+builder.Services.AddScoped<IChatService, ChatService>();
 
 var app = builder.Build();
 
