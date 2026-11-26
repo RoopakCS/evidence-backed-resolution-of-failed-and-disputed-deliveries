@@ -20,6 +20,25 @@ public class DriverProfileRepository : IDriverProfileRepository
             .FirstOrDefaultAsync(dp => dp.UserId == userId);
     }
 
+    public async Task<bool> ExistsByLicenseNumberAsync(string licenseNumber, Guid? excludeUserId = null)
+    {
+        var normalized = licenseNumber.Trim();
+
+        return await _context.DriverProfiles
+            .AnyAsync(dp =>
+                dp.LicenseNumber == normalized &&
+                (!excludeUserId.HasValue || dp.UserId != excludeUserId.Value));
+    }
+
+    public async Task<DriverProfile> AddAsync(DriverProfile driverProfile)
+    {
+        await _context.DriverProfiles.AddAsync(driverProfile);
+
+        await _context.SaveChangesAsync();
+
+        return driverProfile;
+    }
+
     public async Task UpdateAsync(DriverProfile driverProfile)
     {
         driverProfile.UpdatedAt = DateTime.UtcNow;
