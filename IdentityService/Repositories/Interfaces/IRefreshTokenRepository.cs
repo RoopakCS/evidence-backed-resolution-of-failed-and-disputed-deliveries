@@ -4,6 +4,8 @@ namespace IdentityService.Repositories.Interfaces;
 
 public interface IRefreshTokenRepository
 {
+    Task<RefreshToken?> GetByTokenHashAsync(string tokenHash);
+
     Task<RefreshToken?> GetActiveByTokenHashAsync(string tokenHash);
 
     Task AddAsync(RefreshToken refreshToken);

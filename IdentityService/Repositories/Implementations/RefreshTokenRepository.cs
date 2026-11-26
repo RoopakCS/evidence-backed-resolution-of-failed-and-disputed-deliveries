@@ -14,6 +14,13 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         _context = context;
     }
 
+    public async Task<RefreshToken?> GetByTokenHashAsync(string tokenHash)
+    {
+        return await _context.RefreshTokens
+            .Include(rt => rt.User)
+            .FirstOrDefaultAsync(rt => rt.TokenHash == tokenHash);
+    }
+
     public async Task<RefreshToken?> GetActiveByTokenHashAsync(string tokenHash)
     {
         return await _context.RefreshTokens
