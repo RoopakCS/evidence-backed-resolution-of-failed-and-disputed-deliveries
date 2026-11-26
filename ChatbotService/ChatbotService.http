@@ -1,4 +1,4 @@
-@baseUrl = http://localhost:5004
+﻿@baseUrl = http://localhost:5004
 @token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhOGIyYzRkNi0xMjM0LTQ1NjctODkwMS1hYmNkZWYxMjM0NTYiLCJpc3MiOiJkb2NrZXQtaWRlbnRpdHkiLCJhdWQiOiJkb2NrZXQtc2VydmljZXMiLCJpYXQiOjE3OTU2NDAwMDAsImV4cCI6MTg5MzQ1NjAwMH0.n_GKFgC4VcEAk5rUfjwKYPk9v8MS6Vjhe-5UpESnGlo
 
 ### 1. Get Chat History
@@ -79,3 +79,30 @@ Content-Type: application/json
 ### 11. Get conversation history
 GET {{baseUrl}}/api/chat/history
 Authorization: Bearer {{token}}
+
+### Test multilingual support - Tamil
+POST {{baseUrl}}/api/chat/messages
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "message": "வணக்கம்! என் டெலிவரி இன்னும் வரவில்லை. என்ன செய்யலாம்?"
+}
+
+### Test multilingual support - Tanglish
+POST {{baseUrl}}/api/chat/messages
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "message": "En delivery innum varala. Enna panradhu?"
+}
+
+### Test language switching
+POST {{baseUrl}}/api/chat/messages
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "message": "My delivery hasn't arrived yet. Please explain what I should do in Tamil."
+}
