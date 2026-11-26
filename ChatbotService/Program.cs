@@ -5,6 +5,9 @@ using ChatbotService.Repositories.Implementations;
 using ChatbotService.Repositories.Interfaces;
 using ChatbotService.Services.Implementations;
 using ChatbotService.Services.Interfaces;
+using ChatbotService.Tools;
+using ChatbotService.Tools.Interfaces;
+using ChatbotService.Tools.ShipmentTools;
 using Docket.Security.Extensions;
 using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
@@ -49,6 +52,15 @@ builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddSingleton<PromptLoader>();
 
 builder.Services.AddHttpClient<GroqClient>();
+
+builder.Services.AddHttpClient<GetMyShipmentsTool>();
+
+builder.Services.AddTransient<IChatTool>(
+    sp => sp.GetRequiredService<GetMyShipmentsTool>()
+);
+
+builder.Services.AddScoped<ToolRegistry>();
+builder.Services.AddScoped<ToolExecutor>();
 
 builder.Services.Configure<ChatbotSettings>(
     builder.Configuration.GetSection("Chatbot"));

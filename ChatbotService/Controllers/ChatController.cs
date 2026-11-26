@@ -2,6 +2,7 @@
 using ChatbotService.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 
 namespace ChatbotService.Controllers;
@@ -30,9 +31,22 @@ public class ChatController : ControllerBase
             return Unauthorized();
         }
 
+        if (!AuthenticationHeaderValue.TryParse(
+                Request.Headers.Authorization.ToString(),
+                out var authorization)
+            || !string.Equals(
+                authorization.Scheme,
+                "Bearer",
+                StringComparison.OrdinalIgnoreCase)
+            || string.IsNullOrWhiteSpace(authorization.Parameter))
+        {
+            return Unauthorized();
+        }
+
         var response = await _chatService.SendMessageAsync(
             customerId.Value,
             request,
+            authorization.Parameter,
             cancellationToken);
 
         return Ok(response);

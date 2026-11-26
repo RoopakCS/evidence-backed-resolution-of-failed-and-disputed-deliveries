@@ -1,4 +1,5 @@
-﻿using ChatbotService.AI;
+﻿using System.Text.Json;
+using ChatbotService.AI;
 using ChatbotService.Configuration;
 using ChatbotService.DTOs;
 using ChatbotService.DTOs.Groq;
@@ -6,6 +7,7 @@ using ChatbotService.Enums;
 using ChatbotService.Models;
 using ChatbotService.Repositories.Interfaces;
 using ChatbotService.Services.Interfaces;
+using ChatbotService.Tools;
 using Microsoft.Extensions.Options;
 
 namespace ChatbotService.Services.Implementations;
@@ -16,6 +18,8 @@ public class ChatService : IChatService
     private readonly IMessageRepository _messageRepository;
     private readonly GroqClient _groqClient;
     private readonly PromptLoader _promptLoader;
+    private readonly ToolRegistry _toolRegistry;
+    private readonly ToolExecutor _toolExecutor;
     private readonly ChatbotSettings _chatbotSettings;
     private readonly GroqSettings _groqSettings;
 
@@ -24,6 +28,8 @@ public class ChatService : IChatService
         IMessageRepository messageRepository,
         GroqClient groqClient,
         PromptLoader promptLoader,
+        ToolRegistry toolRegistry,
+        ToolExecutor toolExecutor,
         IOptions<ChatbotSettings> chatbotSettings,
         IOptions<GroqSettings> groqSettings)
     {
@@ -31,6 +37,8 @@ public class ChatService : IChatService
         _messageRepository = messageRepository;
         _groqClient = groqClient;
         _promptLoader = promptLoader;
+        _toolRegistry = toolRegistry;
+        _toolExecutor = toolExecutor;
         _chatbotSettings = chatbotSettings.Value;
         _groqSettings = groqSettings.Value;
     }
@@ -38,6 +46,7 @@ public class ChatService : IChatService
     public async Task<SendMessageResponse> SendMessageAsync(
         Guid customerId,
         SendMessageRequest request,
+        string accessToken,
         CancellationToken cancellationToken = default)
     {
         var conversation = await _conversationRepository
@@ -96,18 +105,121 @@ public class ChatService : IChatService
                 Content = message.Content
             }));
 
-        var groqResponse = await _groqClient.GetChatCompletionAsync(
-            new GroqChatRequestDto
-            {
-                Model = _groqSettings.Model,
-                Temperature = _groqSettings.Temperature,
-                MaxCompletionTokens = _groqSettings.MaxTokens,
-                Messages = groqMessages
-            },
-            cancellationToken);
+        const int maxToolCallRounds = 3;
+        const string toolFailureResult =
+            "The requested information could not be retrieved.";
+        const string toolCallLimitResponse =
+            "I couldn't complete that request because it required too many tool calls.";
+        const string malformedToolCallResponse =
+            "I couldn't complete that request because the tool response was invalid.";
 
-        var assistantContent = groqResponse.Choices?
-            .FirstOrDefault()?.Message?.Content;
+        var toolCallRounds = 0;
+        string? assistantContent = null;
+
+        while (true)
+        {
+            var groqResponse = await _groqClient.GetChatCompletionAsync(
+                new GroqChatRequestDto
+                {
+                    Model = _groqSettings.Model,
+                    Temperature = _groqSettings.Temperature,
+                    MaxCompletionTokens = _groqSettings.MaxTokens,
+                    Messages = groqMessages,
+                    Tools = _toolRegistry.GetToolDefinitions()
+                },
+                cancellationToken);
+
+            var choice = groqResponse.Choices?.FirstOrDefault();
+            var assistantResponse = choice?.Message;
+
+            if (assistantResponse is null)
+            {
+                break;
+            }
+
+            var toolCalls = assistantResponse.ToolCalls;
+            var requestedTools = toolCalls is { Count: > 0 }
+                || string.Equals(
+                    choice?.FinishReason,
+                    "tool_calls",
+                    StringComparison.OrdinalIgnoreCase);
+
+            if (!requestedTools)
+            {
+                assistantContent = assistantResponse.Content;
+                break;
+            }
+
+            if (toolCalls is not { Count: > 0 })
+            {
+                assistantContent = toolFailureResult;
+                break;
+            }
+
+            if (toolCalls.Any(toolCall =>
+                    toolCall is null || string.IsNullOrWhiteSpace(toolCall.Id)))
+            {
+                assistantContent = malformedToolCallResponse;
+                break;
+            }
+
+            if (toolCallRounds >= maxToolCallRounds)
+            {
+                assistantContent = toolCallLimitResponse;
+                break;
+            }
+
+            toolCallRounds++;
+
+            groqMessages.Add(new GroqMessageDto
+            {
+                Role = "assistant",
+                Content = assistantResponse.Content,
+                ToolCalls = toolCalls
+            });
+
+            foreach (var toolCall in toolCalls)
+            {
+                var toolCallId = toolCall.Id;
+                var function = toolCall.Function;
+                string toolResult;
+
+                if (function is null
+                    || string.IsNullOrWhiteSpace(function.Name)
+                    || _toolRegistry.GetTool(function.Name) is null)
+                {
+                    toolResult = toolFailureResult;
+                }
+                else
+                {
+                    try
+                    {
+                        using var argumentsDocument = JsonDocument.Parse(function.Arguments);
+                        toolResult = await _toolExecutor.ExecuteAsync(
+                            function.Name,
+                            argumentsDocument.RootElement,
+                            customerId,
+                            accessToken,
+                            cancellationToken);
+                    }
+                    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                    {
+                        throw;
+                    }
+                    catch (Exception)
+                    {
+                        toolResult = toolFailureResult;
+                    }
+                }
+
+                groqMessages.Add(new GroqMessageDto
+                {
+                    Role = "tool",
+                    Content = toolResult,
+                    ToolCallId = toolCallId
+                });
+            }
+        }
 
         if (string.IsNullOrWhiteSpace(assistantContent))
         {

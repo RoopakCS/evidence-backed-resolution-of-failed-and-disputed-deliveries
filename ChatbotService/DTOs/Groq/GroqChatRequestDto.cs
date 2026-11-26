@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using ChatbotService.Tools.DTOs;
 
 namespace ChatbotService.DTOs.Groq;
 
@@ -15,4 +16,8 @@ public class GroqChatRequestDto
 
     [JsonPropertyName("max_completion_tokens")]
     public int MaxCompletionTokens { get; set; } = 1024;
+
+    [JsonPropertyName("tools")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<ChatToolDefinition>? Tools { get; set; }
 }
