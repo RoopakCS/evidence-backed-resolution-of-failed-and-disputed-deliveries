@@ -6,7 +6,10 @@ public interface IChatService
 {
     Task<SendMessageResponse> SendMessageAsync(
         Guid customerId,
-        SendMessageRequest request);
+        SendMessageRequest request,
+        CancellationToken cancellationToken = default);
 
-    Task<ChatHistoryResponse> GetHistoryAsync(Guid customerId);
+    Task<ChatHistoryResponse> GetHistoryAsync(
+        Guid customerId,
+        CancellationToken cancellationToken = default);
 }

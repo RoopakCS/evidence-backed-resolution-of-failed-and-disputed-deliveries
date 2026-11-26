@@ -21,4 +21,14 @@
     <ProjectReference Include="..\Docket.Security\Docket.Security.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Configuration\Prompts\" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <None Update="Configuration\Prompts\SystemPrompt.txt">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -1,3 +1,4 @@
+using ChatbotService.AI;
 using ChatbotService.Configuration;
 using ChatbotService.Data;
 using ChatbotService.Repositories.Implementations;
@@ -44,6 +45,22 @@ builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 
 builder.Services.AddScoped<IChatService, ChatService>();
+
+builder.Services.AddSingleton<PromptLoader>();
+
+builder.Services.AddHttpClient<GroqClient>();
+
+builder.Services.Configure<ChatbotSettings>(
+    builder.Configuration.GetSection("Chatbot"));
+
+builder.Services.Configure<GroqSettings>(
+    builder.Configuration.GetSection("Groq"));
+
+builder.Services.PostConfigure<GroqSettings>(options =>
+{
+    options.ApiKey = builder.Configuration["GROQ_API_KEY"]
+        ?? options.ApiKey;
+});
 
 var app = builder.Build();
 

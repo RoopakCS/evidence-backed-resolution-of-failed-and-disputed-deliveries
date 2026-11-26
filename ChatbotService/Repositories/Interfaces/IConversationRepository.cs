@@ -4,11 +4,19 @@ namespace ChatbotService.Repositories.Interfaces;
 
 public interface IConversationRepository
 {
-    Task<Conversation?> GetByCustomerIdAsync(Guid customerId);
+    Task<Conversation?> GetByCustomerIdAsync(
+        Guid customerId,
+        CancellationToken cancellationToken = default);
 
-    Task<Conversation?> GetByCustomerIdWithMessagesAsync(Guid customerId);
+    Task<Conversation?> GetByCustomerIdWithMessagesAsync(
+        Guid customerId,
+        CancellationToken cancellationToken = default);
 
-    Task<Conversation> CreateAsync(Conversation conversation);
+    Task<Conversation> CreateAsync(
+        Conversation conversation,
+        CancellationToken cancellationToken = default);
 
-    Task UpdateAsync(Conversation conversation);
+    Task UpdateAsync(
+        Conversation conversation,
+        CancellationToken cancellationToken = default);
 }

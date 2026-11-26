@@ -20,7 +20,8 @@ public class ChatController : ControllerBase
 
     [HttpPost("messages")]
     public async Task<ActionResult<SendMessageResponse>> SendMessage(
-        [FromBody] SendMessageRequest request)
+        [FromBody] SendMessageRequest request,
+        CancellationToken cancellationToken)
     {
         var customerId = GetCustomerId();
 
@@ -31,13 +32,15 @@ public class ChatController : ControllerBase
 
         var response = await _chatService.SendMessageAsync(
             customerId.Value,
-            request);
+            request,
+            cancellationToken);
 
         return Ok(response);
     }
 
     [HttpGet("history")]
-    public async Task<ActionResult<ChatHistoryResponse>> GetHistory()
+    public async Task<ActionResult<ChatHistoryResponse>> GetHistory(
+        CancellationToken cancellationToken)
     {
         var customerId = GetCustomerId();
 
@@ -47,7 +50,8 @@ public class ChatController : ControllerBase
         }
 
         var response = await _chatService.GetHistoryAsync(
-            customerId.Value);
+            customerId.Value,
+            cancellationToken);
 
         return Ok(response);
     }

@@ -43,3 +43,39 @@ GET {{baseUrl}}/api/chat/history
 ### 6. Test With Invalid JWT
 GET {{baseUrl}}/api/chat/history
 Authorization: Bearer invalid_token
+
+###
+
+### 7. Test Groq Connection
+GET {{baseUrl}}/api/test/groq
+
+### 8. Send a message to the AI
+POST {{baseUrl}}/api/chat/messages
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "message": "Hi! What can you help me with?"
+}
+
+### 9. Test conversation context
+POST {{baseUrl}}/api/chat/messages
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "message": "My name is Basil. Remember that for this conversation."
+}
+
+### 10. Test conversation context
+POST {{baseUrl}}/api/chat/messages
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "message": "What is my name?"
+}
+
+### 11. Get conversation history
+GET {{baseUrl}}/api/chat/history
+Authorization: Bearer {{token}}

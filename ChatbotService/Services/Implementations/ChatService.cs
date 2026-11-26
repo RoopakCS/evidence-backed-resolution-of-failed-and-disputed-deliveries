@@ -1,8 +1,12 @@
-﻿using ChatbotService.DTOs;
+﻿using ChatbotService.AI;
+using ChatbotService.Configuration;
+using ChatbotService.DTOs;
+using ChatbotService.DTOs.Groq;
 using ChatbotService.Enums;
 using ChatbotService.Models;
 using ChatbotService.Repositories.Interfaces;
 using ChatbotService.Services.Interfaces;
+using Microsoft.Extensions.Options;
 
 namespace ChatbotService.Services.Implementations;
 
@@ -10,24 +14,35 @@ public class ChatService : IChatService
 {
     private readonly IConversationRepository _conversationRepository;
     private readonly IMessageRepository _messageRepository;
+    private readonly GroqClient _groqClient;
+    private readonly PromptLoader _promptLoader;
+    private readonly ChatbotSettings _chatbotSettings;
+    private readonly GroqSettings _groqSettings;
 
     public ChatService(
         IConversationRepository conversationRepository,
-        IMessageRepository messageRepository)
+        IMessageRepository messageRepository,
+        GroqClient groqClient,
+        PromptLoader promptLoader,
+        IOptions<ChatbotSettings> chatbotSettings,
+        IOptions<GroqSettings> groqSettings)
     {
         _conversationRepository = conversationRepository;
         _messageRepository = messageRepository;
+        _groqClient = groqClient;
+        _promptLoader = promptLoader;
+        _chatbotSettings = chatbotSettings.Value;
+        _groqSettings = groqSettings.Value;
     }
 
     public async Task<SendMessageResponse> SendMessageAsync(
         Guid customerId,
-        SendMessageRequest request)
+        SendMessageRequest request,
+        CancellationToken cancellationToken = default)
     {
-        // Find the customer's existing conversation
         var conversation = await _conversationRepository
-            .GetByCustomerIdAsync(customerId);
+            .GetByCustomerIdAsync(customerId, cancellationToken);
 
-        // Create a conversation if one doesn't exist
         if (conversation == null)
         {
             conversation = new Conversation
@@ -38,10 +53,9 @@ public class ChatService : IChatService
             };
 
             conversation = await _conversationRepository
-                .CreateAsync(conversation);
+                .CreateAsync(conversation, cancellationToken);
         }
 
-        // Save the customer's message
         var userMessage = new Message
         {
             ConversationId = conversation.Id,
@@ -50,26 +64,72 @@ public class ChatService : IChatService
             CreatedAt = DateTime.UtcNow
         };
 
-        userMessage = await _messageRepository.CreateAsync(userMessage);
+        userMessage = await _messageRepository.CreateAsync(userMessage, cancellationToken);
 
-        // Temporary placeholder response
+        var history = await _messageRepository.GetByConversationIdAsync(
+            conversation.Id,
+            cancellationToken);
+
+        if (!history.Any(message => message.Id == userMessage.Id))
+        {
+            history.Add(userMessage);
+        }
+
+        var maxConversationMessages = Math.Max(1, _chatbotSettings.MaxConversationMessages);
+        var groqMessages = new List<GroqMessageDto>
+        {
+            new()
+            {
+                Role = "system",
+                Content = await _promptLoader.LoadSystemPromptAsync(cancellationToken)
+            }
+        };
+
+        groqMessages.AddRange(history
+            .Where(message => message.Sender is MessageSender.User or MessageSender.Assistant)
+            .OrderBy(message => message.CreatedAt)
+            .ThenBy(message => message.Id)
+            .TakeLast(maxConversationMessages)
+            .Select(message => new GroqMessageDto
+            {
+                Role = message.Sender == MessageSender.User ? "user" : "assistant",
+                Content = message.Content
+            }));
+
+        var groqResponse = await _groqClient.GetChatCompletionAsync(
+            new GroqChatRequestDto
+            {
+                Model = _groqSettings.Model,
+                Temperature = _groqSettings.Temperature,
+                MaxCompletionTokens = _groqSettings.MaxTokens,
+                Messages = groqMessages
+            },
+            cancellationToken);
+
+        var assistantContent = groqResponse.Choices?
+            .FirstOrDefault()?.Message?.Content;
+
+        if (string.IsNullOrWhiteSpace(assistantContent))
+        {
+            throw new InvalidOperationException(
+                "Groq did not return assistant text for the chat completion.");
+        }
+
         var assistantMessage = new Message
         {
             ConversationId = conversation.Id,
             Sender = MessageSender.Assistant,
-            Content = "Hello! I'm Docket's assistant. AI integration is coming soon!",
+            Content = assistantContent,
             CreatedAt = DateTime.UtcNow
         };
 
         assistantMessage = await _messageRepository
-            .CreateAsync(assistantMessage);
+            .CreateAsync(assistantMessage, cancellationToken);
 
-        // Update conversation's last activity time
         conversation.UpdatedAt = DateTime.UtcNow;
 
-        await _conversationRepository.UpdateAsync(conversation);
+        await _conversationRepository.UpdateAsync(conversation, cancellationToken);
 
-        // Return both messages
         return new SendMessageResponse
         {
             UserMessage = MapToMessageResponse(userMessage),
@@ -77,10 +137,12 @@ public class ChatService : IChatService
         };
     }
 
-    public async Task<ChatHistoryResponse> GetHistoryAsync(Guid customerId)
+    public async Task<ChatHistoryResponse> GetHistoryAsync(
+        Guid customerId,
+        CancellationToken cancellationToken = default)
     {
         var conversation = await _conversationRepository
-            .GetByCustomerIdWithMessagesAsync(customerId);
+            .GetByCustomerIdWithMessagesAsync(customerId, cancellationToken);
 
         // Customer has no conversation yet
         if (conversation == null)
