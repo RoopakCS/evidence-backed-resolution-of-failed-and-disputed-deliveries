@@ -48,4 +48,6 @@ public class Shipment
     public ICollection<RescheduleRequest> RescheduleRequests { get; set; } = new List<RescheduleRequest>();
 
     public ICollection<Return> Returns { get; set; } = new List<Return>();
+
+    public ICollection<ShipmentStatusHistory> StatusHistory { get; set; } = new List<ShipmentStatusHistory>();
 }

@@ -1,0 +1,241 @@
+@baseUrl = http://localhost:5001
+
+### Paste JWTs from IdentityService (/api/auth/login) below
+@customerAccessToken = REPLACE_WITH_CUSTOMER_ACCESS_TOKEN
+@staffAccessToken = REPLACE_WITH_SUPPORT_OR_ADMIN_ACCESS_TOKEN
+
+### Paste IDs returned from 1.1 (Create Shipment) and subsequent calls
+@shipmentId = REPLACE_WITH_SHIPMENT_ID
+@trackingNumber = REPLACE_WITH_TRACKING_NUMBER
+@instructionId = REPLACE_WITH_INSTRUCTION_ID
+@rescheduleId = REPLACE_WITH_RESCHEDULE_ID
+@returnId = REPLACE_WITH_RETURN_ID
+
+# ==============================================================================
+# 1. SHIPMENTS (/api/shipments)
+# ==============================================================================
+
+### 1.1 Create a Shipment (Customer)
+# @name createShipment
+POST {{baseUrl}}/api/shipments
+Authorization: Bearer {{customerAccessToken}}
+Content-Type: application/json
+
+{
+  "recipientName": "Alice Johnson",
+  "recipientPhone": "+15550101001",
+  "addressLine1": "742 Evergreen Terrace",
+  "addressLine2": "Apt 4B",
+  "city": "Springfield",
+  "state": "IL",
+  "postalCode": "62704",
+  "country": "USA",
+  "latitude": 39.7817,
+  "longitude": -89.6501,
+  "expectedDeliveryDate": "2026-12-05T18:00:00Z",
+  "initialInstructions": [
+    {
+      "instructionType": "DeliveryLocation",
+      "dropOffPlace": "Front porch",
+      "gateOrAccessCode": "4421#",
+      "floor": "2",
+      "door": "4B",
+      "instructionText": "Please leave behind the planter if no one answers.",
+      "photoUrl": "https://example.com/instructions/porch.jpg"
+    }
+  ]
+}
+
+###
+
+### 1.2 List Shipments (Customer sees own; Staff/Driver sees all)
+GET {{baseUrl}}/api/shipments?page=1&pageSize=20
+Authorization: Bearer {{customerAccessToken}}
+
+###
+
+### 1.3 Get Shipment Details by ID
+GET {{baseUrl}}/api/shipments/{{shipmentId}}
+Authorization: Bearer {{customerAccessToken}}
+
+###
+
+### 1.4 Update Shipment Details
+PUT {{baseUrl}}/api/shipments/{{shipmentId}}
+Authorization: Bearer {{customerAccessToken}}
+Content-Type: application/json
+
+{
+  "recipientPhone": "+15550109999",
+  "addressLine2": "Apt 4C"
+}
+
+###
+
+### 1.5 Public Tracking Lookup (No Auth Required, Non-PII)
+GET {{baseUrl}}/api/shipments/track/{{trackingNumber}}
+
+###
+
+### 1.6 Get Shipment Status History
+GET {{baseUrl}}/api/shipments/{{shipmentId}}/history
+Authorization: Bearer {{customerAccessToken}}
+
+###
+
+### 1.7 Record Tracking Update (SupportAgent or Administrator)
+POST {{baseUrl}}/api/shipments/{{shipmentId}}/tracking
+Authorization: Bearer {{staffAccessToken}}
+Content-Type: application/json
+
+{
+  "status": "InTransit",
+  "note": "Arrived at regional sorting facility.",
+  "location": "Chicago, IL"
+}
+
+###
+
+# ==============================================================================
+# 2. DELIVERY INSTRUCTIONS (/api/shipments/{shipmentId}/instructions)
+# ==============================================================================
+
+### 2.1 Create Delivery Instruction (Idempotent)
+# @name createInstruction
+POST {{baseUrl}}/api/shipments/{{shipmentId}}/instructions
+Authorization: Bearer {{customerAccessToken}}
+Idempotency-Key: instr-create-001
+Content-Type: application/json
+
+{
+  "instructionType": "DeliveryLocation",
+  "dropOffPlace": "Mailroom",
+  "gateOrAccessCode": "1234*",
+  "floor": "1",
+  "door": "Mailroom A",
+  "instructionText": "Ring bell #102 on arrival.",
+  "photoUrl": "https://example.com/instructions/mailroom.jpg"
+}
+
+###
+
+### 2.2 Replay Same Create Instruction Request (Expected: same 201 response, no duplicate)
+POST {{baseUrl}}/api/shipments/{{shipmentId}}/instructions
+Authorization: Bearer {{customerAccessToken}}
+Idempotency-Key: instr-create-001
+Content-Type: application/json
+
+{
+  "instructionType": "DeliveryLocation",
+  "dropOffPlace": "Mailroom",
+  "gateOrAccessCode": "1234*",
+  "floor": "1",
+  "door": "Mailroom A",
+  "instructionText": "Ring bell #102 on arrival.",
+  "photoUrl": "https://example.com/instructions/mailroom.jpg"
+}
+
+###
+
+### 2.3 List Instructions for Shipment
+GET {{baseUrl}}/api/shipments/{{shipmentId}}/instructions
+Authorization: Bearer {{customerAccessToken}}
+
+###
+
+### 2.4 Update Delivery Instruction
+PUT {{baseUrl}}/api/shipments/{{shipmentId}}/instructions/{{instructionId}}
+Authorization: Bearer {{customerAccessToken}}
+Idempotency-Key: instr-update-001
+Content-Type: application/json
+
+{
+  "dropOffPlace": "Reception desk",
+  "gateOrAccessCode": "9876#",
+  "instructionText": "Hand over to concierge if unavailable."
+}
+
+###
+
+# ==============================================================================
+# 3. RESCHEDULES (/api/shipments/{shipmentId}/reschedules)
+# ==============================================================================
+
+### 3.1 Request Reschedule (Customer)
+# @name createReschedule
+POST {{baseUrl}}/api/shipments/{{shipmentId}}/reschedules
+Authorization: Bearer {{customerAccessToken}}
+Idempotency-Key: resched-create-001
+Content-Type: application/json
+
+{
+  "requestedDeliveryDate": "2026-12-10T15:00:00Z",
+  "reason": "Will be away on original delivery date."
+}
+
+###
+
+### 3.2 List Reschedule Requests
+GET {{baseUrl}}/api/shipments/{{shipmentId}}/reschedules
+Authorization: Bearer {{customerAccessToken}}
+
+###
+
+### 3.3 Process Reschedule Request (SupportAgent or Administrator)
+POST {{baseUrl}}/api/shipments/{{shipmentId}}/reschedules/{{rescheduleId}}/process
+Authorization: Bearer {{staffAccessToken}}
+Idempotency-Key: resched-process-001
+Content-Type: application/json
+
+{
+  "decision": "Approve",
+  "reason": "Confirmed with carrier window."
+}
+
+###
+
+# ==============================================================================
+# 4. RETURNS (/api/shipments/{shipmentId}/returns)
+# ==============================================================================
+
+### 4.1 Initiate Return (Customer)
+# @name initiateReturn
+POST {{baseUrl}}/api/shipments/{{shipmentId}}/returns
+Authorization: Bearer {{customerAccessToken}}
+Idempotency-Key: return-init-001
+Content-Type: application/json
+
+{
+  "returnReason": "No longer needed."
+}
+
+###
+
+### 4.2 List Returns for Shipment
+GET {{baseUrl}}/api/shipments/{{shipmentId}}/returns
+Authorization: Bearer {{customerAccessToken}}
+
+###
+
+### 4.3 Update Return Status (SupportAgent or Administrator)
+PATCH {{baseUrl}}/api/shipments/{{shipmentId}}/returns/{{returnId}}/status
+Authorization: Bearer {{staffAccessToken}}
+Content-Type: application/json
+
+{
+  "status": "ReturnedToSender"
+}
+
+###
+
+# ==============================================================================
+# 5. NEGATIVE / AUTH CHECKS
+# ==============================================================================
+
+### 5.1 List Shipments Without Token (Expected: 401 Unauthorized)
+GET {{baseUrl}}/api/shipments
+
+###
+
+### 5.2 Track Non-Existent Shipment (Expected: 404 Not Found)
+GET {{baseUrl}}/api/shipments/track/NONEXISTENT

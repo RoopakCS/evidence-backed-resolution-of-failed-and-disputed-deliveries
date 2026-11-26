@@ -8,9 +8,19 @@ public class DeliveryInstruction
 
     public Guid ShipmentId { get; set; }
 
-    public InstructionType InstructionType { get; set; }
+    public InstructionType InstructionType { get; set; } = InstructionType.DeliveryLocation;
 
-    public string InstructionText { get; set; } = string.Empty;
+    public string DropOffPlace { get; set; } = string.Empty;
+
+    public string? GateOrAccessCode { get; set; }
+
+    public string? Floor { get; set; }
+
+    public string? Door { get; set; }
+
+    public string? InstructionText { get; set; }
+
+    public string? PhotoUrl { get; set; }
 
     public InstructionStatus Status { get; set; } = InstructionStatus.Pending;
 
