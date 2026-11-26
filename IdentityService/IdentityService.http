@@ -1,0 +1,219 @@
+@baseUrl = http://localhost:5000
+
+### Run 1.1 (Register Customer) and 1.2 (Register Driver) first, then paste the returned tokens/IDs below
+@customerAccessToken = REPLACE_WITH_CUSTOMER_ACCESS_TOKEN
+@customerRefreshToken = REPLACE_WITH_CUSTOMER_REFRESH_TOKEN
+
+@driverAccessToken = REPLACE_WITH_DRIVER_ACCESS_TOKEN
+@driverRefreshToken = REPLACE_WITH_DRIVER_REFRESH_TOKEN
+@driverUserId = REPLACE_WITH_DRIVER_USER_ID
+
+### Administrator JWT (valid for 7 days, signed with Jwt__SecretKey in .env)
+@adminAccessToken = REPLACE_WITH_ADMIN_JWT
+
+# ==============================================================================
+# 1. AUTHENTICATION ENDPOINTS (/api/auth)
+# ==============================================================================
+
+### 1.1 Register a Customer
+# @name registerCustomer
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "firstName": "Alice",
+  "lastName": "Johnson",
+  "email": "alice.johnson@example.com",
+  "phoneNumber": "+15550101001",
+  "password": "Password123!",
+  "role": "Customer"
+}
+
+###
+
+### 1.2 Register a Driver
+# @name registerDriver
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "firstName": "Bob",
+  "lastName": "Smith",
+  "email": "bob.smith@example.com",
+  "phoneNumber": "+15550101002",
+  "password": "Password123!",
+  "role": "Driver"
+}
+
+###
+
+### 1.3 Register with Privileged Role (Expected: 400 Bad Request)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "firstName": "Eve",
+  "lastName": "Mallory",
+  "email": "eve.admin@example.com",
+  "phoneNumber": "+15550101003",
+  "password": "Password123!",
+  "role": "Administrator"
+}
+
+###
+
+### 1.4 Login with Email
+# @name loginByEmail
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "emailOrPhone": "alice.johnson@example.com",
+  "password": "Password123!"
+}
+
+###
+
+### 1.5 Login with Phone Number
+# @name loginByPhone
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "phoneNumber": "+15550101002",
+  "password": "Password123!"
+}
+
+###
+
+### 1.6 Login with Invalid Password (Expected: 401 Unauthorized)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "alice.johnson@example.com",
+  "password": "WrongPassword!"
+}
+
+###
+
+### 1.7 Refresh Access Token
+# @name refreshCustomerToken
+POST {{baseUrl}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{customerRefreshToken}}"
+}
+
+###
+
+# ==============================================================================
+# 2. USER PROFILE ENDPOINTS (/api/users)
+# ==============================================================================
+
+### 2.1 Get Current User Profile (Customer)
+GET {{baseUrl}}/api/users/me
+Authorization: Bearer {{customerAccessToken}}
+
+###
+
+### 2.2 Update Current User Profile (Customer)
+PUT {{baseUrl}}/api/users/me
+Authorization: Bearer {{customerAccessToken}}
+Content-Type: application/json
+
+{
+  "firstName": "Alice",
+  "lastName": "Johnson-Updated",
+  "phoneNumber": "+15550101001",
+  "address": "742 Evergreen Terrace, Springfield"
+}
+
+###
+
+### 2.3 Access Profile Without Token (Expected: 401 Unauthorized)
+GET {{baseUrl}}/api/users/me
+
+###
+
+# ==============================================================================
+# 3. DRIVER PROFILE ENDPOINTS (/api/drivers)
+# ==============================================================================
+
+### 3.1 Get Driver Profile Before Completion (Expected: 404 Not Found)
+GET {{baseUrl}}/api/drivers/me
+Authorization: Bearer {{driverAccessToken}}
+
+###
+
+### 3.2 Create / Update Driver Profile
+PUT {{baseUrl}}/api/drivers/me
+Authorization: Bearer {{driverAccessToken}}
+Content-Type: application/json
+
+{
+  "licenseNumber": "DL-2026-998877",
+  "vehicleType": "Van",
+  "vehicleRegistrationNumber": "KA-01-AB-1234"
+}
+
+###
+
+### 3.3 Get Driver Profile After Completion (Expected: 200 OK)
+GET {{baseUrl}}/api/drivers/me
+Authorization: Bearer {{driverAccessToken}}
+
+###
+
+### 3.4 Customer Trying to Access Driver Endpoint (Expected: 403 Forbidden)
+GET {{baseUrl}}/api/drivers/me
+Authorization: Bearer {{customerAccessToken}}
+
+###
+
+### 3.5 Update Availability While Pending Verification (Expected: 403 Forbidden)
+PUT {{baseUrl}}/api/drivers/me/availability
+Authorization: Bearer {{driverAccessToken}}
+Content-Type: application/json
+
+{
+  "availabilityStatus": "Available"
+}
+
+###
+
+### 3.6 Admin: Verify Driver (Requires Administrator Role)
+PUT {{baseUrl}}/api/drivers/{{driverUserId}}/verify
+Authorization: Bearer {{adminAccessToken}}
+Content-Type: application/json
+
+{
+  "verificationStatus": "Verified"
+}
+
+###
+
+### 3.7 Update Availability After Verification (Expected: 200 OK)
+PUT {{baseUrl}}/api/drivers/me/availability
+Authorization: Bearer {{driverAccessToken}}
+Content-Type: application/json
+
+{
+  "availabilityStatus": "Available"
+}
+
+###
+
+# ==============================================================================
+# 4. TOKEN REVOCATION / LOGOUT
+# ==============================================================================
+
+### 4.1 Revoke Refresh Token (Logout)
+POST {{baseUrl}}/api/auth/revoke
+Authorization: Bearer {{driverAccessToken}}
+Content-Type: application/json
+
+{
+  "refreshToken": "{{driverRefreshToken}}"
+}
