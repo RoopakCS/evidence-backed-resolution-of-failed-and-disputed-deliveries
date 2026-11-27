@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using DeliveryAttemptService.DTOs.Common;
 using DeliveryAttemptService.Models.Enums;
 
 namespace DeliveryAttemptService.DTOs.Requests;
@@ -30,18 +29,21 @@ public class RecordAttemptRequest : IValidatableObject
     [StringLength(100, ErrorMessage = "IdempotencyKey cannot exceed 100 characters.")]
     public string IdempotencyKey { get; set; } = string.Empty;
 
-    /// <summary>
-    /// Optional references to evidence uploaded with or prior to this attempt.
-    /// </summary>
-    public List<EvidenceUploadReferenceDto>? Evidence { get; set; }
-
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
+        if (ShipmentId == Guid.Empty)
+            yield return new ValidationResult("ShipmentId must not be empty.", new[] { nameof(ShipmentId) });
+        if (CapturedAt == default)
+            yield return new ValidationResult("CapturedAt must be provided.", new[] { nameof(CapturedAt) });
+        if (!Enum.IsDefined(Result))
+            yield return new ValidationResult("Result is invalid.", new[] { nameof(Result) });
         if (Result == AttemptResult.Failed && !FailureReason.HasValue)
         {
             yield return new ValidationResult(
                 "FailureReason is required when AttemptResult is Failed.",
                 new[] { nameof(FailureReason) });
         }
+        if (FailureReason.HasValue && !Enum.IsDefined(FailureReason.Value))
+            yield return new ValidationResult("FailureReason is invalid.", new[] { nameof(FailureReason) });
     }
 }

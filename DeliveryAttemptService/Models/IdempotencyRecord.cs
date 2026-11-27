@@ -6,9 +6,17 @@ public class IdempotencyRecord
 
     public string IdempotencyKey { get; set; } = string.Empty;
 
+    public Guid UserId { get; set; }
+
+    public string Endpoint { get; set; } = string.Empty;
+
     public string ActionType { get; set; } = string.Empty;
 
     public Guid ResultEntityId { get; set; }
+
+    public int StatusCode { get; set; }
+
+    public string ResponseBody { get; set; } = string.Empty;
 
     public string RequestHash { get; set; } = string.Empty;
 

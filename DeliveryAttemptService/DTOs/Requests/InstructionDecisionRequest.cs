@@ -3,7 +3,7 @@ using DeliveryAttemptService.Models.Enums;
 
 namespace DeliveryAttemptService.DTOs.Requests;
 
-public class InstructionDecisionRequest
+public class InstructionDecisionRequest : IValidatableObject
 {
     [Required(ErrorMessage = "InstructionId is required.")]
     public Guid InstructionId { get; set; }
@@ -23,4 +23,16 @@ public class InstructionDecisionRequest
     [Required(ErrorMessage = "IdempotencyKey is required.")]
     [StringLength(100, ErrorMessage = "IdempotencyKey cannot exceed 100 characters.")]
     public string IdempotencyKey { get; set; } = string.Empty;
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (InstructionId == Guid.Empty)
+            yield return new ValidationResult("InstructionId must not be empty.", new[] { nameof(InstructionId) });
+        if (ShipmentId == Guid.Empty)
+            yield return new ValidationResult("ShipmentId must not be empty.", new[] { nameof(ShipmentId) });
+        if (DecidedAt == default)
+            yield return new ValidationResult("DecidedAt must be provided.", new[] { nameof(DecidedAt) });
+        if (!Enum.IsDefined(Decision))
+            yield return new ValidationResult("Decision is invalid.", new[] { nameof(Decision) });
+    }
 }

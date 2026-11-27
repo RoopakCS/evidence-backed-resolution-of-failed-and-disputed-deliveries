@@ -17,7 +17,7 @@ public class CreateEvidenceUploadUrlRequest
     public string MediaType { get; set; } = string.Empty;
 
     [Range(1, 104857600, ErrorMessage = "FileSize must be between 1 byte and 100MB.")]
-    public long? FileSize { get; set; }
+    public long FileSize { get; set; }
 
     [Required(ErrorMessage = "EvidenceType is required.")]
     public EvidenceType EvidenceType { get; set; }

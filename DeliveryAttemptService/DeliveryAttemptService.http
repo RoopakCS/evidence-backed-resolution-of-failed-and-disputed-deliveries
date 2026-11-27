@@ -1,0 +1,203 @@
+@identityUrl = http://localhost:5000
+@serviceUrl = http://localhost:5002
+@adminEmail = replace-with-admin-email
+@adminPassword = replace-with-admin-password
+@driverEmail = replace-with-driver-email
+@driverPassword = replace-with-driver-password
+@customerEmail = replace-with-customer-email
+@customerPassword = replace-with-customer-password
+@shipmentId = 11111111-1111-4111-8111-111111111111
+@instructionId = 22222222-2222-4222-8222-222222222222
+@capturedAt = 2026-11-27T10:00:00Z
+
+# Configure Database and matching Jwt settings, then apply
+# `dotnet ef database update --project DeliveryAttemptService\DeliveryAttemptService.csproj --startup-project DeliveryAttemptService\DeliveryAttemptService.csproj`.
+# Start IdentityService on port 5000 and DeliveryAttemptService on port 5002,
+# then replace the three credential values above with existing accounts. The
+# admin account must have the Administrator role; driver/customer accounts can
+# be self-registered. Evidence requests need valid AWS credentials and a
+# private S3 bucket configured for the service's region.
+
+### Login administrator
+# @name loginAdministrator
+POST {{identityUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "EmailOrPhone": "{{adminEmail}}",
+  "Password": "{{adminPassword}}"
+}
+
+### Login driver
+# @name loginDriver
+POST {{identityUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "EmailOrPhone": "{{driverEmail}}",
+  "Password": "{{driverPassword}}"
+}
+
+### Login customer
+# @name loginCustomer
+POST {{identityUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "EmailOrPhone": "{{customerEmail}}",
+  "Password": "{{customerPassword}}"
+}
+
+### Create or reassign a shipment to the driver
+# @name upsertAssignment
+POST {{serviceUrl}}/api/driver/assignments
+Authorization: Bearer {{loginAdministrator.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "ShipmentId": "{{shipmentId}}",
+  "DriverId": "{{loginDriver.response.body.$.user.id}}",
+  "CustomerId": "{{loginCustomer.response.body.$.user.id}}",
+  "TrackingNumber": "HTTP-TEST-001",
+  "RecipientName": "Test Customer",
+  "RecipientPhone": "+15555550100",
+  "AddressLine1": "100 Test Street",
+  "City": "Test City",
+  "State": "Test State",
+  "PostalCode": "10000",
+  "Country": "US",
+  "Latitude": 40.7128,
+  "Longitude": -74.0060,
+  "ScheduledDate": "{{capturedAt}}",
+  "Instructions": [
+    {
+      "Id": "{{instructionId}}",
+      "InstructionType": "DropOff",
+      "InstructionText": "Leave at the front door",
+      "Status": "Sent"
+    }
+  ]
+}
+
+### List today's assignments
+# @name getAssignments
+GET {{serviceUrl}}/api/driver/assignments?date=2026-11-27T00:00:00Z
+Authorization: Bearer {{loginDriver.response.body.$.accessToken}}
+
+### Accept the shipment instruction
+# @name recordInstructionDecision
+POST {{serviceUrl}}/api/driver/instructions/decision
+Authorization: Bearer {{loginDriver.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "InstructionId": "{{instructionId}}",
+  "ShipmentId": "{{shipmentId}}",
+  "Decision": "Accepted",
+  "DecidedAt": "{{capturedAt}}",
+  "IdempotencyKey": "http-test-instruction-decision-01"
+}
+
+### List decisions for the shipment (driver)
+GET {{serviceUrl}}/api/driver/instructions/shipment/{{shipmentId}}/decisions
+Authorization: Bearer {{loginDriver.response.body.$.accessToken}}
+
+### Record a failed delivery attempt
+# @name recordAttempt
+POST {{serviceUrl}}/api/attempts
+Authorization: Bearer {{loginDriver.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "ShipmentId": "{{shipmentId}}",
+  "Result": "Failed",
+  "FailureReason": "RecipientUnavailable",
+  "AttemptNote": "No one answered the door.",
+  "Latitude": 40.7128,
+  "Longitude": -74.0060,
+  "CapturedAt": "{{capturedAt}}",
+  "IdempotencyKey": "http-test-attempt-failed-01"
+}
+
+### Replay the same attempt to verify idempotency
+# @name replayAttempt
+POST {{serviceUrl}}/api/attempts
+Authorization: Bearer {{loginDriver.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "ShipmentId": "{{shipmentId}}",
+  "Result": "Failed",
+  "FailureReason": "RecipientUnavailable",
+  "AttemptNote": "No one answered the door.",
+  "Latitude": 40.7128,
+  "Longitude": -74.0060,
+  "CapturedAt": "{{capturedAt}}",
+  "IdempotencyKey": "http-test-attempt-failed-01"
+}
+
+### Get the recorded attempt (customer ownership check)
+GET {{serviceUrl}}/api/attempts/{{recordAttempt.response.body.$.attemptId}}
+Authorization: Bearer {{loginCustomer.response.body.$.accessToken}}
+
+### List attempts for the shipment (customer ownership check)
+GET {{serviceUrl}}/api/attempts/shipment/{{shipmentId}}
+Authorization: Bearer {{loginCustomer.response.body.$.accessToken}}
+
+### Create a short-lived evidence upload URL
+# @name createEvidenceUpload
+POST {{serviceUrl}}/api/evidence/upload-url
+Authorization: Bearer {{loginDriver.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "AttemptId": "{{recordAttempt.response.body.$.attemptId}}",
+  "FileName": "http-proof.txt",
+  "MediaType": "text/plain",
+  "FileSize": 34,
+  "EvidenceType": "Other"
+}
+
+### Upload evidence to the returned S3 URL
+# @name putEvidenceObject
+PUT {{createEvidenceUpload.response.body.$.uploadUrl}}
+Content-Type: text/plain
+
+< ./TestEvidence.txt
+
+### Confirm evidence upload and store its SHA-256
+# @name confirmEvidenceUpload
+POST {{serviceUrl}}/api/evidence/confirm
+Authorization: Bearer {{loginDriver.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "EvidenceId": "{{createEvidenceUpload.response.body.$.evidenceId}}",
+  "ContentHash": "366454efb0dca019fe387cae5e5b7dbd3e6fb69aee0c44dbe0e3377aaa308c40",
+  "UploadConfirmation": true
+}
+
+### List evidence for the attempt (customer ownership check)
+GET {{serviceUrl}}/api/evidence/attempt/{{recordAttempt.response.body.$.attemptId}}
+Authorization: Bearer {{loginCustomer.response.body.$.accessToken}}
+
+### Read the private evidence object with its short-lived download URL
+GET {{confirmEvidenceUpload.response.body.$.downloadUrl}}
+
+### Sync an offline-created attempt and receive one result for the action
+# @name syncOfflineActions
+POST {{serviceUrl}}/api/driver/sync
+Authorization: Bearer {{loginDriver.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "Actions": [
+    {
+      "ActionId": "http-test-offline-attempt-01",
+      "ActionType": "RecordAttempt",
+      "IdempotencyKey": "http-test-offline-attempt-01",
+      "CapturedAt": "{{capturedAt}}",
+      "PayloadJson": "{\"ShipmentId\":\"{{shipmentId}}\",\"Result\":\"Delivered\",\"CapturedAt\":\"{{capturedAt}}\",\"IdempotencyKey\":\"http-test-offline-attempt-01\",\"Latitude\":40.7128,\"Longitude\":-74.0060}"
+    }
+  ]
+}

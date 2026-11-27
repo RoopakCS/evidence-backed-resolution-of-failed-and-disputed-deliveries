@@ -37,6 +37,10 @@ public class Evidence
 
     public Guid CreatedByDriverId { get; set; }
 
+    public bool IsConfirmed { get; set; }
+
+    public DateTime? ConfirmedAt { get; set; }
+
     // Navigation property
     public DeliveryAttempt? Attempt { get; set; }
 }
